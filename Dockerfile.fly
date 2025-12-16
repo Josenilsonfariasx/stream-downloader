@@ -1,0 +1,51 @@
+# Multi-stage build para Fly.io
+FROM python:3.11-slim as backend-build
+
+WORKDIR /app
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar e instalar dependências Python
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código do backend
+COPY backend/ .
+
+# Stage final
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependências runtime
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    curl \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar do build anterior
+COPY --from=backend-build /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-build /app /app
+
+# Copiar frontend
+COPY frontend/ /usr/share/nginx/html/
+
+# Copiar nginx config para Fly.io
+COPY nginx.fly.conf /etc/nginx/nginx.conf
+
+# Criar diretório de downloads
+RUN mkdir -p /app/downloads
+
+# Expor porta
+EXPOSE 8080
+
+# Script de inicialização
+COPY start-fly.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
