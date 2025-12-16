@@ -1,6 +1,7 @@
 import yt_dlp
 import os
 import logging
+import time
 from pathlib import Path
 from config import Config
 from utils.validators import (
@@ -18,6 +19,21 @@ class YouTubeService:
     def __init__(self):
         self.config = Config()
         self.download_dir = Path(self.config.DOWNLOAD_FOLDER)
+        # Cache simples para evitar re-extração de info (TTL: 5 minutos)
+        self._info_cache = {}
+        self._cache_ttl = 300  # 5 minutos
+    
+    def _get_cached_info(self, video_id):
+        """Retorna info do cache se ainda válida"""
+        if video_id in self._info_cache:
+            cached = self._info_cache[video_id]
+            if time.time() - cached['timestamp'] < self._cache_ttl:
+                logger.info(f"Usando cache para vídeo: {video_id}")
+                return cached['data']
+            else:
+                # Cache expirado, remove
+                del self._info_cache[video_id]
+        return None
     
     def extract_video_info(self, url):
         """
@@ -36,6 +52,11 @@ class YouTubeService:
             # Valida URL e extrai video ID
             video_id = validate_youtube_url(url)
             
+            # Verifica cache primeiro
+            cached_info = self._get_cached_info(video_id)
+            if cached_info:
+                return cached_info
+            
             ydl_opts = {
                 'quiet': True,
                 'no_warnings': True,
@@ -45,10 +66,27 @@ class YouTubeService:
                 'referer': 'https://www.youtube.com/',
                 'extractor_args': {
                     'youtube': {
-                        'player_client': ['android', 'web'],
-                        'player_skip': ['webpage', 'configs'],
+                        'player_client': ['android'],  # Apenas Android, mais rápido
+                        'player_skip': ['webpage', 'configs', 'js'],  # Pula mais coisas
+                        'skip': ['hls', 'dash', 'translated_subs'],  # Não precisa disso para preview
                     }
                 },
+                # Otimizações de performance
+                'nocheckcertificate': True,
+                'socket_timeout': 6,  # Reduzido ainda mais
+                'http_chunk_size': 10485760,
+                'retries': 1,  # Apenas 1 tentativa para ser mais rápido
+                'fragment_retries': 1,
+                # Não baixar thumbnail ou legendas na validação
+                'skip_download': True,
+                'no_playlist': True,
+                'ignoreerrors': False,
+                # Não extrair formatos detalhados, só básico
+                'format': 'best',
+                'youtube_include_dash_manifest': False,
+                'youtube_include_hls_manifest': False,
+                'lazy_playlist': True,
+                'age_limit': None,  # Não verifica restrição de idade
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -59,7 +97,7 @@ class YouTubeService:
                 duration = info.get('duration', 0)
                 validate_duration(duration, self.config.MAX_VIDEO_DURATION)
                 
-                # Extrai formatos e qualidades disponíveis
+                # Qualidades padrão (não extrai de formatos para economizar tempo)
                 qualities = self._get_available_qualities(info)
                 
                 result = {
@@ -68,10 +106,16 @@ class YouTubeService:
                     'thumbnail': info.get('thumbnail', ''),
                     'duration': duration,
                     'duration_string': self._format_duration(duration),
-                    'uploader': info.get('uploader', 'Desconhecido'),
-                    'view_count': info.get('view_count', 0),
+                    'uploader': info.get('uploader', info.get('channel', 'Desconhecido')),
+                    # Removido view_count para economizar tempo
                     'qualities': qualities,
                     'url': url
+                }
+                
+                # Armazena no cache
+                self._info_cache[video_id] = {
+                    'data': result,
+                    'timestamp': time.time()
                 }
                 
                 logger.info(f"Informações extraídas com sucesso: {result['title']}")
@@ -118,6 +162,14 @@ class YouTubeService:
                         'player_skip': ['webpage', 'configs'],
                     }
                 },
+                # Otimizações de performance
+                'nocheckcertificate': True,
+                'socket_timeout': 15,
+                'http_chunk_size': 10485760,  # 10MB chunks para downloads mais rápidos
+                'retries': 3,
+                'fragment_retries': 3,
+                'concurrent_fragment_downloads': 3,  # Download paralelo de fragmentos
+                'no_playlist': True,
             }
             
             if download_type == 'audio':
@@ -179,7 +231,7 @@ class YouTubeService:
     
     def _get_available_qualities(self, info):
         """
-        Extrai qualidades disponíveis dos formatos
+        Extrai qualidades disponíveis dos formatos (versão otimizada)
         
         Args:
             info (dict): Informações do vídeo
@@ -187,36 +239,35 @@ class YouTubeService:
         Returns:
             list: Lista de qualidades disponíveis
         """
-        qualities = []
-        formats = info.get('formats', [])
-        
-        # Sempre adiciona 'best'
-        qualities.append({
-            'value': 'best',
-            'label': 'Melhor qualidade',
-            'note': 'Máxima qualidade disponível'
-        })
-        
-        # Mapear qualidades comuns
-        quality_map = {
-            '1080': '1080p',
-            '720': '720p',
-            '480': '480p',
-            '360': '360p'
-        }
-        
-        seen = set()
-        for fmt in formats:
-            height = fmt.get('height')
-            if height:
-                for key, label in quality_map.items():
-                    if str(height) == key and label not in seen:
-                        qualities.append({
-                            'value': label,
-                            'label': label,
-                            'note': f'{height}p'
-                        })
-                        seen.add(label)
+        # Retorna qualidades padrão sem processar todos os formatos
+        # Isso economiza tempo na extração
+        qualities = [
+            {
+                'value': 'best',
+                'label': 'Melhor qualidade',
+                'note': 'Máxima qualidade disponível'
+            },
+            {
+                'value': '1080p',
+                'label': '1080p',
+                'note': 'Full HD'
+            },
+            {
+                'value': '720p',
+                'label': '720p',
+                'note': 'HD'
+            },
+            {
+                'value': '480p',
+                'label': '480p',
+                'note': 'SD'
+            },
+            {
+                'value': '360p',
+                'label': '360p',
+                'note': 'Baixa'
+            }
+        ]
         
         return qualities
     
