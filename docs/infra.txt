@@ -1,0 +1,24 @@
+youtube-downloader/
+├── backend/
+│   ├── app.py                 # Aplicação principal Flask
+│   ├── requirements. txt       # Dependências Python
+│   ├── config.py             # Configurações
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   └── download.py       # Rotas de download
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── youtube_service.py # Lógica de negócio
+│   └── utils/
+│       ├── __init__.py
+│       └── validators.py      # Validações
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── app.js
+├── downloads/                 # Pasta temporária para downloads
+├── . gitignore
+├── README. md
+└── docker-compose. yml        # Opcional

@@ -1,0 +1,5 @@
+Usuário cola o link do YouTube
+✅ Backend valida e extrai informações (miniatura, título, duração, qualidade)
+✅ Frontend exibe preview com informações
+✅ Usuário confirma e escolhe qualidade
+✅ Backend faz download e retorna o arquivo

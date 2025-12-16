@@ -1,0 +1,45 @@
+services:
+  # Backend Flask
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: youtube-downloader-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - downloads_data:/app/downloads
+    environment:
+      - DEBUG=True
+      - FLASK_ENV=development
+      - SECRET_KEY=change-this-in-production
+      - CORS_ORIGINS=*
+      - MAX_VIDEO_DURATION=3600
+      - MAX_FILE_SIZE=524288000
+      - TEMP_FILE_RETENTION=3600
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Frontend Nginx
+  frontend:
+    image: nginx:alpine
+    container_name: youtube-downloader-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  downloads_data:
+
+networks:
+  app-network:
+    driver: bridge

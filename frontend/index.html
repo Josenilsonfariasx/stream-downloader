@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📺 YouTube Downloader</h1>
+        <p class="subtitle">Baixe vídeos do YouTube facilmente</p>
+      </header>
+
+      <main>
+        <!-- Área de entrada de URL -->
+        <section class="input-section">
+          <div class="input-group">
+            <input
+              type="text"
+              id="urlInput"
+              placeholder="Cole o link do YouTube aqui..."
+              autocomplete="off"
+            />
+            <button id="validateBtn" class="btn btn-primary">Validar</button>
+          </div>
+          <p class="hint">Exemplo: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+        </section>
+
+        <!-- Mensagens de erro -->
+        <div id="errorMessage" class="message message-error" style="display: none">
+          <span class="message-icon">⚠️</span>
+          <span id="errorText"></span>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="loader" style="display: none">
+          <div class="spinner"></div>
+          <p>Carregando informações do vídeo...</p>
+        </div>
+
+        <!-- Preview do vídeo -->
+        <section id="videoPreview" class="preview-section" style="display: none">
+          <h2>Preview do Vídeo</h2>
+
+          <div class="video-card">
+            <img id="videoThumbnail" src="" alt="Thumbnail" class="thumbnail" />
+
+            <div class="video-info">
+              <h3 id="videoTitle" class="video-title"></h3>
+
+              <div class="video-meta">
+                <span id="videoDuration" class="meta-item">
+                  <span class="icon">⏱️</span>
+                  <span class="text"></span>
+                </span>
+                <span id="videoUploader" class="meta-item">
+                  <span class="icon">👤</span>
+                  <span class="text"></span>
+                </span>
+              </div>
+
+              <div class="download-type-section">
+                <label>Tipo de download:</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="downloadType" value="video" checked />
+                    <span>🎬 Vídeo</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="downloadType" value="audio" />
+                    <span>🎵 Áudio (MP3)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="quality-section">
+                <label for="qualitySelect">Escolha a qualidade:</label>
+                <select id="qualitySelect" class="quality-select">
+                  <!-- Opções serão preenchidas dinamicamente -->
+                </select>
+              </div>
+
+              <button id="downloadBtn" class="btn btn-success">
+                <span class="btn-icon">⬇️</span>
+                <span id="downloadBtnText">Baixar Vídeo</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Status de download -->
+        <div id="downloadStatus" class="message message-info" style="display: none">
+          <span class="message-icon">⬇️</span>
+          <span id="downloadText">Preparando download...</span>
+        </div>
+
+        <!-- Mensagem de sucesso -->
+        <div id="successMessage" class="message message-success" style="display: none">
+          <span class="message-icon">✅</span>
+          <span id="successText">Download iniciado com sucesso!</span>
+        </div>
+      </main>
+
+      <footer>
+        <p class="disclaimer">
+          ⚠️ Use este serviço de forma responsável. Respeite os direitos autorais e os termos de serviço do
+          YouTube.
+        </p>
+        <p class="credits">Desenvolvido com ❤️ usando Flask e yt-dlp</p>
+      </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
