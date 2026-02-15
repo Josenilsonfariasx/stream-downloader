@@ -110,9 +110,9 @@ docker compose -f docker-compose.prod.yml down
 ### 3. Configurar Firewall:
 
 ```bash
-# Permitir portas HTTP/HTTPS
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
+# Permitir portas HTTP/HTTPS configuradas para o frontend
+sudo ufw allow 8081/tcp
+sudo ufw allow 8443/tcp
 sudo ufw allow 22/tcp  # SSH
 sudo ufw enable
 ```

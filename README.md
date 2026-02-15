@@ -279,6 +279,12 @@ RATE_LIMIT_PER_MINUTE=10
 docker-compose up -d
 ```
 
+Por padrão, no arquivo de produção o frontend publica em `8081` (HTTP) e `8443` (HTTPS) para evitar conflito com serviços já usando `80` e `443`. Se quiser customizar:
+
+```bash
+FRONTEND_HTTP_PORT=9090 FRONTEND_HTTPS_PORT=9443 docker compose -f docker-compose.prod.yml up -d
+```
+
 3. Configure um reverse proxy (nginx/traefik) com SSL para produção.
 
 ### Docker Hub
