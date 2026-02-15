@@ -3,28 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YouTube Music Downloader</title>
+    <title>stream2downloader</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="container">
       <header>
-        <div class="logo">
+        <div class="logo" aria-hidden="true">
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="40" r="38" fill="rgba(34, 197, 94, 0.1)" stroke="#22c55e" stroke-width="2" />
+            <circle
+              cx="40"
+              cy="40"
+              r="38"
+              fill="rgba(168, 85, 247, 0.12)"
+              stroke="#a855f7"
+              stroke-width="2"
+            />
             <path
               d="M30 25C30 23.3431 31.3431 22 33 22C33.7403 22 34.3866 22.0741 35.2026 22.2449C37.6611 22.7708 40.8933 23.9082 45 26C49.1067 28.0918 51.8389 29.7708 53.7026 31.1318C54.3866 31.6259 54.9259 32.0741 55.5 32.5926V47.4074C54.9259 47.9259 54.3866 48.3741 53.7026 48.8682C51.8389 50.2292 49.1067 51.9082 45 54C40.8933 56.0918 37.6611 57.2292 35.2026 57.7551C34.3866 57.9259 33.7403 58 33 58C31.3431 58 30 56.6569 30 55V25Z"
-              fill="#22c55e"
+              fill="#a855f7"
             />
           </svg>
         </div>
-        <h1>YouTube Music Downloader</h1>
-        <p class="subtitle">Cole o link do YouTube e baixe sua música</p>
+        <h1>stream2downloader</h1>
+        <p class="subtitle">Download de vídeo e áudio com interface moderna, rápida e clara.</p>
       </header>
 
-      <main>
-        <!-- Área de entrada de URL -->
+      <main class="app-shell">
         <section class="input-section">
+          <h2 class="section-title">1. Cole a URL do YouTube</h2>
           <div class="input-wrapper">
             <span class="input-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -51,97 +58,93 @@
               autocomplete="off"
             />
           </div>
+
           <button id="validateBtn" class="btn btn-primary">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" />
               <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
-            Buscar Informações
+            Validar e carregar
           </button>
-          <p class="hint">Suporta MP3, M4A e outros formatos de áudio</p>
+
+          <p class="hint">Suporte para download em vídeo (MP4) e áudio (MP3).</p>
         </section>
 
-        <!-- Mensagens de erro -->
         <div id="errorMessage" class="message message-error" style="display: none">
-          <span class="message-icon">⚠️</span>
+          <span class="message-icon">!</span>
           <span id="errorText"></span>
         </div>
 
-        <!-- Loader -->
         <div id="loader" class="loader" style="display: none">
           <div class="spinner"></div>
-          <p>Carregando informações do vídeo...</p>
+          <p>Carregando dados do vídeo...</p>
         </div>
 
-        <!-- Preview do vídeo -->
         <section id="videoPreview" class="preview-section" style="display: none">
-          <h2>Preview do Vídeo</h2>
+          <h2 class="section-title">2. Revise e faça o download</h2>
 
           <div class="video-card">
-            <img id="videoThumbnail" src="" alt="Thumbnail" class="thumbnail" />
+            <div class="video-media">
+              <img id="videoThumbnail" src="" alt="Thumbnail do vídeo" class="thumbnail" />
+            </div>
 
             <div class="video-info">
               <h3 id="videoTitle" class="video-title"></h3>
 
               <div class="video-meta">
                 <span id="videoDuration" class="meta-item">
-                  <span class="icon">⏱️</span>
+                  <span class="meta-label">Duração:</span>
                   <span class="text"></span>
                 </span>
                 <span id="videoUploader" class="meta-item">
-                  <span class="icon">👤</span>
+                  <span class="meta-label">Canal:</span>
                   <span class="text"></span>
                 </span>
               </div>
 
               <div class="download-type-section">
-                <label>Tipo de download:</label>
+                <label>Tipo de download</label>
                 <div class="radio-group">
                   <label class="radio-label">
                     <input type="radio" name="downloadType" value="video" checked />
-                    <span>🎬 Vídeo</span>
+                    <span>Vídeo (MP4)</span>
                   </label>
                   <label class="radio-label">
                     <input type="radio" name="downloadType" value="audio" />
-                    <span>🎵 Áudio (MP3)</span>
+                    <span>Áudio (MP3)</span>
                   </label>
                 </div>
               </div>
 
               <div class="quality-section">
-                <label for="qualitySelect">Escolha a qualidade:</label>
-                <select id="qualitySelect" class="quality-select">
-                  <!-- Opções serão preenchidas dinamicamente -->
-                </select>
+                <label for="qualitySelect">Qualidade</label>
+                <select id="qualitySelect" class="quality-select"></select>
               </div>
 
               <button id="downloadBtn" class="btn btn-success">
-                <span class="btn-icon">⬇️</span>
-                <span id="downloadBtnText">Baixar Vídeo</span>
+                <span id="downloadBtnText">Baixar vídeo</span>
               </button>
             </div>
           </div>
         </section>
 
-        <!-- Status de download -->
         <div id="downloadStatus" class="message message-info" style="display: none">
-          <span class="message-icon">⬇️</span>
+          <span class="message-icon">i</span>
           <span id="downloadText">Preparando download...</span>
         </div>
 
-        <!-- Mensagem de sucesso -->
         <div id="successMessage" class="message message-success" style="display: none">
-          <span class="message-icon">✅</span>
-          <span id="successText">Download iniciado com sucesso!</span>
+          <span class="message-icon">ok</span>
+          <span id="successText">Download iniciado com sucesso.</span>
         </div>
       </main>
 
       <footer>
         <p class="disclaimer">
-          ⚠️ Use este serviço de forma responsável. Respeite os direitos autorais e os termos de serviço do
+          Use este serviço de forma responsável. Respeite os direitos autorais e os termos de serviço do
           YouTube.
         </p>
-        <p class="credits">Desenvolvido com ❤️ usando Flask e yt-dlp</p>
+        <p class="credits">stream2downloader desenvolvido por Josenilson Farias</p>
       </footer>
     </div>
 

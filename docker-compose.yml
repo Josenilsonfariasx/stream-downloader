@@ -4,7 +4,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: youtube-downloader-backend
+    container_name: stream2downloader-backend
     ports:
       - "5000:5000"
     volumes:
@@ -25,7 +25,7 @@ services:
   # Frontend Nginx
   frontend:
     image: nginx:alpine
-    container_name: youtube-downloader-frontend
+    container_name: stream2downloader-frontend
     ports:
       - "8080:80"
     volumes:

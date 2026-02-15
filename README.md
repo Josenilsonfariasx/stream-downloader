@@ -1,4 +1,4 @@
-# 📺 YouTube Downloader
+# 📺 stream2downloader
 
 Sistema web para download de vídeos do YouTube com preview e seleção de qualidade.
 
@@ -32,8 +32,8 @@ Sistema web para download de vídeos do YouTube com preview e seleção de quali
 1. **Clone o repositório**
 
 ```bash
-git clone https://github.com/seu-usuario/stream-downloader.git
-cd stream-downloader
+git clone https://github.com/seu-usuario/stream2downloader.git
+cd stream2downloader
 ```
 
 2. **Inicie os containers**
@@ -74,8 +74,8 @@ docker-compose ps
 1. **Clone o repositório**
 
 ```bash
-git clone https://github.com/seu-usuario/stream-downloader.git
-cd stream-downloader
+git clone https://github.com/seu-usuario/stream2downloader.git
+cd stream2downloader
 ```
 
 2. **Configure o ambiente virtual Python**
@@ -127,7 +127,7 @@ python -m http.server 8000
 ## 📁 Estrutura do Projeto
 
 ```
-stream-downloader/
+stream2downloader/
 ├── backend/
 │   ├── app.py                 # Aplicação Flask principal
 │   ├── config.py              # Configurações
@@ -218,7 +218,7 @@ Health check da API.
 ```json
 {
   "status": "healthy",
-  "service": "youtube-downloader"
+  "service": "stream2downloader"
 }
 ```
 
@@ -269,7 +269,6 @@ RATE_LIMIT_PER_MINUTE=10
 ### Docker Compose (Produção)
 
 1. Edite o `docker-compose.yml` e configure:
-
    - `DEBUG=False`
    - `SECRET_KEY` seguro (gere com `python -c "import secrets; print(secrets.token_hex(32))"`)
    - `CORS_ORIGINS` específico (ex: `https://seudominio.com`)
@@ -286,12 +285,12 @@ docker-compose up -d
 
 ```bash
 # Build e push
-docker build -t seu-usuario/youtube-downloader:latest ./backend
-docker push seu-usuario/youtube-downloader:latest
+docker build -t seu-usuario/stream2downloader:latest ./backend
+docker push seu-usuario/stream2downloader:latest
 
 # Pull e run em produção
-docker pull seu-usuario/youtube-downloader:latest
-docker run -d -p 5000:5000 seu-usuario/youtube-downloader:latest
+docker pull seu-usuario/stream2downloader:latest
+docker run -d -p 5000:5000 seu-usuario/stream2downloader:latest
 ```
 
 ## 🧪 Testes
@@ -351,7 +350,7 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ## 👤 Autor
 
-Desenvolvido com ❤️ usando Flask e yt-dlp
+stream2downloader desenvolvido por Josenilson Farias
 
 ## 🙏 Agradecimentos
 

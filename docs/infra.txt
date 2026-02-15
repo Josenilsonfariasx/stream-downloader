@@ -1,4 +1,4 @@
-youtube-downloader/
+stream2downloader/
 ├── backend/
 │   ├── app.py                 # Aplicação principal Flask
 │   ├── requirements. txt       # Dependências Python

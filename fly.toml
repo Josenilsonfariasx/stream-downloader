@@ -1,5 +1,5 @@
 # Fly.io Configuration
-app = "youtube-downloader"
+app = "stream2downloader"
 primary_region = "gru"
 
 [build]

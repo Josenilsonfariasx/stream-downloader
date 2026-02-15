@@ -68,7 +68,7 @@ newgrp docker
 
 ```bash
 git clone seu-repositorio.git
-cd stream-downloader
+cd stream2downloader
 ```
 
 #### Configurar ambiente:

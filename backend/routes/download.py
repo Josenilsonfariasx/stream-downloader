@@ -13,7 +13,7 @@ def health_check():
     """Endpoint de health check"""
     return jsonify({
         'status': 'healthy',
-        'service': 'youtube-downloader'
+        'service': 'stream2downloader'
     }), 200
 
 
@@ -168,5 +168,5 @@ def api_info():
             '/api/info': 'Informações da API'
         },
         'version': '1.0.0',
-        'documentation': 'https://github.com/seu-usuario/stream-downloader'
+        'documentation': 'https://github.com/seu-usuario/stream2downloader'
     }), 200

@@ -49,7 +49,7 @@ def create_app(config_class=Config):
     def index():
         return jsonify({
             'status': 'online',
-            'message': 'YouTube Downloader API',
+            'message': 'stream2downloader API',
             'version': '1.0.0'
         })
     

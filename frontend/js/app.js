@@ -1,14 +1,12 @@
-// Configuração da API
-// Detecta automaticamente se está usando Docker ou desenvolvimento local
 const API_BASE_URL =
   window.location.hostname === "localhost" && window.location.port === "8080"
-    ? "/api" // Docker com nginx proxy
-    : "http://localhost:5000/api"; // Desenvolvimento local
+    ? "/api"
+    : "http://localhost:5000/api";
 
-// Estado da aplicação
+const PROJECT_NAME = "stream2downloader";
+
 let currentVideoData = null;
 
-// Elementos do DOM
 const urlInput = document.getElementById("urlInput");
 const validateBtn = document.getElementById("validateBtn");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -23,63 +21,57 @@ const downloadText = document.getElementById("downloadText");
 const successMessage = document.getElementById("successMessage");
 const successText = document.getElementById("successText");
 
-// Elementos do preview
 const videoThumbnail = document.getElementById("videoThumbnail");
 const videoTitle = document.getElementById("videoTitle");
 const videoDuration = document.getElementById("videoDuration");
 const videoUploader = document.getElementById("videoUploader");
+const qualitySection = document.querySelector(".quality-section");
 
-// Event Listeners
 document.addEventListener("DOMContentLoaded", () => {
   validateBtn.addEventListener("click", handleValidate);
   downloadBtn.addEventListener("click", handleDownload);
 
-  // Mudar texto do botão quando tipo de download mudar
   const downloadTypeRadios = document.querySelectorAll('input[name="downloadType"]');
   downloadTypeRadios.forEach((radio) => {
     radio.addEventListener("change", (e) => {
       if (e.target.value === "audio") {
-        downloadBtnText.textContent = "Baixar Áudio (MP3)";
-        // Ocultar seletor de qualidade para áudio
-        document.querySelector(".quality-section").style.display = "none";
+        downloadBtnText.textContent = "Baixar áudio (MP3)";
+        qualitySection.style.display = "none";
       } else {
-        downloadBtnText.textContent = "Baixar Vídeo";
-        document.querySelector(".quality-section").style.display = "block";
+        downloadBtnText.textContent = "Baixar vídeo";
+        qualitySection.style.display = "block";
       }
     });
   });
 
-  // Permitir validar com Enter
   urlInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       handleValidate();
     }
   });
 
-  // Limpar mensagens ao digitar
   urlInput.addEventListener("input", () => {
     hideAllMessages();
   });
 });
 
-// Função para validar URL
 async function handleValidate() {
   const url = urlInput.value.trim();
 
   if (!url) {
-    showError("Por favor, cole uma URL do YouTube");
+    showError("Cole uma URL do YouTube para continuar.");
     return;
   }
 
-  // Validação básica client-side
   if (!isValidYouTubeUrl(url)) {
-    showError("URL inválida. Certifique-se de que é um link do YouTube");
+    showError("URL inválida. Informe um link válido do YouTube.");
     return;
   }
 
   hideAllMessages();
+  showDownloadStatus(true, "Validando URL e carregando informações...");
   showLoader(true);
-  disableButtons(true);
+  disableButtons(true, "Validando...");
 
   try {
     const response = await fetch(`${API_BASE_URL}/validate`, {
@@ -99,22 +91,24 @@ async function handleValidate() {
     if (data.success) {
       currentVideoData = data.data;
       displayVideoPreview(data.data);
+      showDownloadStatus(false);
+      showSuccess("Vídeo identificado. Revise as opções e inicie o download.");
     } else {
       throw new Error(data.error || "Erro desconhecido");
     }
   } catch (error) {
     console.error("Erro na validação:", error);
-    showError(error.message || "Erro ao processar o vídeo. Tente novamente.");
+    showDownloadStatus(false);
+    showError(error.message || "Não foi possível processar o vídeo. Tente novamente.");
   } finally {
     showLoader(false);
     disableButtons(false);
   }
 }
 
-// Função para fazer download
 async function handleDownload() {
   if (!currentVideoData) {
-    showError("Nenhum vídeo selecionado");
+    showError("Nenhum vídeo disponível para download. Valide uma URL primeiro.");
     return;
   }
 
@@ -123,8 +117,13 @@ async function handleDownload() {
   const downloadType = document.querySelector('input[name="downloadType"]:checked').value;
 
   hideAllMessages();
-  showDownloadStatus(true, downloadType === "audio" ? "Baixando áudio..." : "Preparando download...");
-  disableButtons(true);
+  showDownloadStatus(
+    true,
+    downloadType === "audio"
+      ? "Baixando áudio. Aguarde a geração do arquivo..."
+      : "Baixando vídeo. Aguarde a preparação do arquivo...",
+  );
+  disableButtons(true, "Processando...");
 
   try {
     const response = await fetch(`${API_BASE_URL}/download`, {
@@ -140,10 +139,8 @@ async function handleDownload() {
       throw new Error(data.error || "Erro ao fazer download");
     }
 
-    // Obter o blob do vídeo/áudio
     const blob = await response.blob();
 
-    // Criar URL temporária e fazer download
     const downloadUrl = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = downloadUrl;
@@ -156,28 +153,25 @@ async function handleDownload() {
 
     const successMsg =
       downloadType === "audio"
-        ? "Áudio baixado com sucesso! Verifique seus downloads."
-        : "Download iniciado com sucesso! Verifique seus downloads.";
+        ? "Áudio baixado com sucesso. Confira sua pasta de downloads."
+        : "Vídeo baixado com sucesso. Confira sua pasta de downloads.";
     showSuccess(successMsg);
   } catch (error) {
     console.error("Erro no download:", error);
-    showError(error.message || "Erro ao fazer download. Tente novamente.");
+    showError(error.message || "Falha ao concluir o download. Tente novamente.");
   } finally {
     showDownloadStatus(false);
     disableButtons(false);
   }
 }
 
-// Função para exibir preview do vídeo
 function displayVideoPreview(data) {
-  // Preencher informações
   videoThumbnail.src = data.thumbnail;
   videoThumbnail.alt = data.title;
   videoTitle.textContent = data.title;
   videoDuration.querySelector(".text").textContent = data.duration_string;
   videoUploader.querySelector(".text").textContent = data.uploader;
 
-  // Preencher qualidades
   qualitySelect.innerHTML = "";
   data.qualities.forEach((quality) => {
     const option = document.createElement("option");
@@ -186,12 +180,10 @@ function displayVideoPreview(data) {
     qualitySelect.appendChild(option);
   });
 
-  // Mostrar preview
   videoPreview.style.display = "block";
   videoPreview.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-// Validação de URL do YouTube (client-side)
 function isValidYouTubeUrl(url) {
   const patterns = [
     /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/,
@@ -202,7 +194,6 @@ function isValidYouTubeUrl(url) {
   return patterns.some((pattern) => pattern.test(url));
 }
 
-// Sanitizar nome de arquivo
 function sanitizeFilename(filename) {
   return filename
     .replace(/[<>:"/\\|?*]/g, "")
@@ -210,7 +201,6 @@ function sanitizeFilename(filename) {
     .substring(0, 200);
 }
 
-// Funções de UI
 function showError(message) {
   errorText.textContent = message;
   errorMessage.style.display = "flex";
@@ -220,7 +210,6 @@ function showSuccess(message) {
   successText.textContent = message;
   successMessage.style.display = "flex";
 
-  // Auto-hide após 5 segundos
   setTimeout(() => {
     successMessage.style.display = "none";
   }, 5000);
@@ -250,16 +239,10 @@ function disableButtons(disabled) {
   downloadBtn.disabled = disabled;
   urlInput.disabled = disabled;
   qualitySelect.disabled = disabled;
+
+  validateBtn.querySelector("svg").style.display = disabled ? "none" : "inline";
+  validateBtn.lastChild.textContent = disabled ? " Aguarde..." : " Validar e carregar";
 }
 
-// Função para resetar a aplicação
-function resetApp() {
-  urlInput.value = "";
-  currentVideoData = null;
-  videoPreview.style.display = "none";
-  hideAllMessages();
-}
-
-// Log de inicialização
-console.log("YouTube Downloader inicializado");
+console.log(`${PROJECT_NAME} inicializado`);
 console.log("API URL:", API_BASE_URL);
