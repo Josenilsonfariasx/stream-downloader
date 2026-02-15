@@ -42,12 +42,9 @@ COPY frontend/ /usr/share/nginx/html/
 # Copiar nginx config para Fly.io
 COPY nginx.fly.conf /etc/nginx/nginx.conf
 
-# Copiar cookies do YouTube para autenticação do yt-dlp
-COPY cookies.txt /app/cookies/youtube_cookies.txt
-
 # Criar diretório de downloads
 RUN mkdir -p /app/downloads && \
-    chmod 600 /app/cookies/youtube_cookies.txt
+    mkdir -p /app/cookies
 
 # Porta padrão do Nginx no container (pode ser alterada por PORT)
 ENV PORT=8082
