@@ -39,10 +39,20 @@ class YouTubeService:
         """Aplica opções de autenticação do YouTube quando configuradas."""
         cookie_file = self.config.YT_COOKIES_FILE
         if cookie_file:
-            if Path(cookie_file).exists():
+            cookie_path = Path(cookie_file)
+            if cookie_path.exists():
+                cookie_size = cookie_path.stat().st_size
                 options['cookiefile'] = cookie_file
+                logger.info(f"Usando cookies do YouTube: {cookie_file} ({cookie_size} bytes)")
+                if cookie_size < 200:
+                    logger.warning("Arquivo de cookies muito pequeno; pode estar inválido")
             else:
                 logger.warning(f"YT_COOKIES_FILE configurado, mas arquivo não encontrado: {cookie_file}")
+
+        if self.config.YT_PROXY_URL:
+            options['proxy'] = self.config.YT_PROXY_URL
+            logger.info("Proxy configurado para yt-dlp (YT_PROXY_URL)")
+
         return options
     
     def extract_video_info(self, url):
