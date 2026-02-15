@@ -39,6 +39,9 @@ class Config:
         'no_warnings': True,
         'extract_flat': False,
     }
+
+    # Autenticação opcional para YouTube (contornar bloqueio anti-bot)
+    YT_COOKIES_FILE = os.getenv('YT_COOKIES_FILE', '').strip()
     
     # Qualidades disponíveis
     AVAILABLE_QUALITIES = ['best', '1080p', '720p', '480p', '360p']

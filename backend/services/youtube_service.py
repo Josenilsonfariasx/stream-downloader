@@ -34,6 +34,16 @@ class YouTubeService:
                 # Cache expirado, remove
                 del self._info_cache[video_id]
         return None
+
+        def _apply_auth_options(self, options):
+            """Aplica opções de autenticação do YouTube quando configuradas."""
+            cookie_file = self.config.YT_COOKIES_FILE
+            if cookie_file:
+                if Path(cookie_file).exists():
+                    options['cookiefile'] = cookie_file
+                else:
+                    logger.warning(f"YT_COOKIES_FILE configurado, mas arquivo não encontrado: {cookie_file}")
+            return options
     
     def extract_video_info(self, url):
         """
@@ -89,6 +99,8 @@ class YouTubeService:
                 'age_limit': None,  # Não verifica restrição de idade
             }
             
+            ydl_opts = self._apply_auth_options(ydl_opts)
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 logger.info(f"Extraindo informações do vídeo: {video_id}")
                 info = ydl.extract_info(url, download=False)
@@ -126,7 +138,14 @@ class YouTubeService:
             raise
         except Exception as e:
             logger.error(f"Erro ao extrair informações: {str(e)}")
-            raise ValidationError(f"Erro ao processar vídeo: {str(e)}")
+            error_message = str(e)
+
+            if "Sign in to confirm you’re not a bot" in error_message or "Sign in to confirm you're not a bot" in error_message:
+                raise ValidationError(
+                    "YouTube exigiu verificação anti-bot. Configure YT_COOKIES_FILE com um arquivo cookies.txt válido."
+                )
+
+            raise ValidationError(f"Erro ao processar vídeo: {error_message}")
     
     def download_video(self, url, quality='best', download_type='video'):
         """
@@ -189,6 +208,8 @@ class YouTubeService:
                     **common_opts,
                     'format': format_string,
                 }
+
+            ydl_opts = self._apply_auth_options(ydl_opts)
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 logger.info(f"Iniciando download: {video_id} ({download_type}) em qualidade {quality}")

@@ -17,4 +17,9 @@ nginx
 
 # Iniciar Flask
 cd /app
-python app.py
+gunicorn \
+    --bind 0.0.0.0:5000 \
+    --workers "${GUNICORN_WORKERS:-2}" \
+    --threads "${GUNICORN_THREADS:-4}" \
+    --timeout "${GUNICORN_TIMEOUT:-300}" \
+    "app:create_app()"
