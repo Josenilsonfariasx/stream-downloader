@@ -3,8 +3,10 @@ FROM python:3.11-slim as backend-build
 
 WORKDIR /app
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Instalar dependências do sistema
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -21,8 +23,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Instalar dependências runtime
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
     nginx \
