@@ -45,7 +45,8 @@ COPY nginx.fly.conf /etc/nginx/nginx.conf
 # Criar diretório de downloads
 RUN mkdir -p /app/downloads
 
-# Expor porta
+# Porta padrão do Nginx no container (pode ser alterada por PORT)
+ENV PORT=8082
 EXPOSE 8082
 
 # Script de inicialização

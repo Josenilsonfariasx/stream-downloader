@@ -1,7 +1,7 @@
-const API_BASE_URL =
-  window.location.hostname === "localhost" && window.location.port === "8080"
-    ? "/api"
-    : "http://localhost:5000/api";
+const isLocalStaticFrontend =
+  ["localhost", "127.0.0.1"].includes(window.location.hostname) && window.location.port === "8000";
+
+const API_BASE_URL = isLocalStaticFrontend ? "http://localhost:5000/api" : "/api";
 
 const PROJECT_NAME = "stream2downloader";
 
