@@ -17,7 +17,7 @@ nginx
 
 # Iniciar Flask
 cd /app
-gunicorn \
+python -m gunicorn \
     --bind 0.0.0.0:5000 \
     --workers "${GUNICORN_WORKERS:-2}" \
     --threads "${GUNICORN_THREADS:-4}" \
