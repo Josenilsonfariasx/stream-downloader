@@ -76,34 +76,48 @@ class YouTubeService:
                 'referer': 'https://www.youtube.com/',
                 'extractor_args': {
                     'youtube': {
-                        'player_client': ['android'],  # Apenas Android, mais rápido
-                        'player_skip': ['webpage', 'configs', 'js'],  # Pula mais coisas
-                        'skip': ['hls', 'dash', 'translated_subs'],  # Não precisa disso para preview
+                        'player_client': ['web', 'android', 'ios'],
                     }
                 },
                 # Otimizações de performance
                 'nocheckcertificate': True,
                 'socket_timeout': 6,  # Reduzido ainda mais
                 'http_chunk_size': 10485760,
-                'retries': 1,  # Apenas 1 tentativa para ser mais rápido
-                'fragment_retries': 1,
+                'retries': 3,
+                'fragment_retries': 3,
                 # Não baixar thumbnail ou legendas na validação
                 'skip_download': True,
                 'no_playlist': True,
                 'ignoreerrors': False,
                 # Não extrair formatos detalhados, só básico
                 'format': 'best',
-                'youtube_include_dash_manifest': False,
-                'youtube_include_hls_manifest': False,
-                'lazy_playlist': True,
-                'age_limit': None,  # Não verifica restrição de idade
             }
             
             ydl_opts = self._apply_auth_options(ydl_opts)
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                logger.info(f"Extraindo informações do vídeo: {video_id}")
-                info = ydl.extract_info(url, download=False)
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    logger.info(f"Extraindo informações do vídeo: {video_id}")
+                    info = ydl.extract_info(url, download=False)
+            except Exception as first_error:
+                first_error_text = str(first_error)
+                if "Failed to extract any player response" not in first_error_text:
+                    raise
+
+                logger.warning("Falha no player response, tentando fallback de extração")
+                fallback_opts = {
+                    **ydl_opts,
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['tv', 'web', 'android'],
+                        }
+                    },
+                    'retries': 4,
+                    'fragment_retries': 4,
+                }
+
+                with yt_dlp.YoutubeDL(fallback_opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
                 
                 # Valida duração
                 duration = info.get('duration', 0)
@@ -178,7 +192,6 @@ class YouTubeService:
                 'extractor_args': {
                     'youtube': {
                         'player_client': ['android', 'web'],
-                        'player_skip': ['webpage', 'configs'],
                     }
                 },
                 # Otimizações de performance
