@@ -35,15 +35,15 @@ class YouTubeService:
                 del self._info_cache[video_id]
         return None
 
-        def _apply_auth_options(self, options):
-            """Aplica opções de autenticação do YouTube quando configuradas."""
-            cookie_file = self.config.YT_COOKIES_FILE
-            if cookie_file:
-                if Path(cookie_file).exists():
-                    options['cookiefile'] = cookie_file
-                else:
-                    logger.warning(f"YT_COOKIES_FILE configurado, mas arquivo não encontrado: {cookie_file}")
-            return options
+    def _apply_auth_options(self, options):
+        """Aplica opções de autenticação do YouTube quando configuradas."""
+        cookie_file = self.config.YT_COOKIES_FILE
+        if cookie_file:
+            if Path(cookie_file).exists():
+                options['cookiefile'] = cookie_file
+            else:
+                logger.warning(f"YT_COOKIES_FILE configurado, mas arquivo não encontrado: {cookie_file}")
+        return options
     
     def extract_video_info(self, url):
         """
