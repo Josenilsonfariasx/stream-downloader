@@ -46,7 +46,7 @@ COPY nginx.fly.conf /etc/nginx/nginx.conf
 RUN mkdir -p /app/downloads
 
 # Expor porta
-EXPOSE 8080
+EXPOSE 8082
 
 # Script de inicialização
 COPY start-fly.sh /start.sh
