@@ -14,6 +14,7 @@ build/
 # Environment variables
 .env
 .env.local
+cookies.txt
 
 # Downloads
 downloads/*
